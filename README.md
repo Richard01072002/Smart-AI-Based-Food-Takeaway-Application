@@ -34,24 +34,24 @@ The application targets students and working professionals who frequently order 
 ## System Architecture
 <!--Embed the system architecture diagram as shown below-->
 
-<!-- Replace the below link with your actual image URL from your GitHub repo -->
-![System Architecture](https://github.com/<<yourusername>>/Smart-AI-Food-Takeaway/assets/<<image-id-1>>/system-architecture)
+<img width="1408" height="768" alt="image" src="https://github.com/user-attachments/assets/c6ffc848-4ce8-406e-b079-66bde376f96f" />
 
 ## Output
 
 <!--Embed the Output picture at respective places as shown below-->
 #### Output1 - Home and Menu Screen
 
-<!-- Replace with real screenshot URL -->
-![Home and Menu Screen](https://github.com/<<yourusername>>/Smart-AI-Food-Takeaway/assets/<<image-id-2>>/output-home-menu)
+<img width="2870" height="1560" alt="image" src="https://github.com/user-attachments/assets/01beaa20-4b2d-490e-a527-a437807c2def" />
+
 
 #### Output2 - AI Chatbot Ordering Flow
+<img width="808" height="802" alt="image" src="https://github.com/user-attachments/assets/be1fbade-d45d-496f-bde2-a4babd3f5008" />
+<img width="808" height="794" alt="image" src="https://github.com/user-attachments/assets/39d1a15d-3265-4fdf-80f7-f6dcc52da12a" />
 
-![Chatbot Ordering Flow](https://github.com/<<yourusername>>/Smart-AI-Food-Takeaway/assets/<<image-id-3>>/output-chatbot)
 
 #### Output3 - Voice Ordering & Confirmation
 
-![Voice Ordering](https://github.com/<<yourusername>>/Smart-AI-Food-Takeaway/assets/<<image-id-4>>/output-voice)
+<img width="2854" height="1482" alt="image" src="https://github.com/user-attachments/assets/eb0930dc-1d1a-4ac7-9bbe-d8cc7908bc3b" />
 
 Ordering Success Rate (demo environment): ~90% correct intent detection for supported phrases.  
 Note: These metrics can be updated based on your actual testing and evaluation.
