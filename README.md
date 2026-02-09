@@ -1,8 +1,5 @@
 # Smart AI-Based Food Takeaway Application
 
-## Title of the Project
-Smart AI-Based Food Takeaway Application
-
 A web-based system that integrates an AI conversational assistant into a food ordering platform to enable natural language and voice-based food ordering, personalized suggestions, and real-time order assistance for customers.
 
 ## About
