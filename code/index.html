@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tummy AI • Order with Your Voice</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #00ff9d;
+            --accent: #00d4ff;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', system-ui, sans-serif;
+            background: linear-gradient(135deg, #0a0a1f, #1a0f2e, #0f172a);
+            color: white;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+
+        .glass {
+            background: rgba(255, 255, 255, 0.06);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255,255,255,0.08);
+        }
+
+        .neon-glow {
+            box-shadow: 0 0 35px rgba(0, 255, 157, 0.4);
+        }
+
+        .orb {
+            width: 280px;
+            height: 280px;
+            background: radial-gradient(circle at 35% 35%, #00ff9d, #00b8ff, #7b00ff);
+            border-radius: 50%;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 
+                0 0 80px rgba(0, 255, 157, 0.6),
+                inset 0 0 40px rgba(255,255,255,0.3);
+            animation: floatOrb 7s ease-in-out infinite;
+        }
+
+        .orb.listening {
+            animation: pulseListening 1.2s infinite ease-in-out;
+            box-shadow: 0 0 100px rgba(255, 107, 150, 0.8);
+        }
+
+        @keyframes floatOrb {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-25px) rotate(8deg); }
+        }
+
+        @keyframes pulseListening {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.08); }
+        }
+
+        .waveform {
+            display: flex;
+            align-items: flex-end;
+            gap: 4px;
+            height: 48px;
+        }
+
+        .bar {
+            width: 5px;
+            background: var(--primary);
+            border-radius: 999px;
+            animation: soundwave 1.2s infinite ease-in-out;
+        }
+
+        .listening .bar { background: #ff6b9d; animation-duration: 0.6s; }
+
+        @keyframes soundwave {
+            0%, 100% { height: 12px; }
+            50% { height: 48px; }
+        }
+
+        .message {
+            animation: messageIn 0.4s ease;
+        }
+
+        @keyframes messageIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .food-chip {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .food-chip:hover {
+            transform: translateY(-4px) scale(1.05);
+            box-shadow: 0 10px 20px rgba(0, 255, 157, 0.2);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-6">
+    <div class="max-w-7xl w-full grid grid-cols-1 lg:grid-cols-12 gap-8">
+        
+        <!-- Left: Voice Assistant + Orb -->
+        <div class="lg:col-span-5 flex flex-col items-center justify-center space-y-10">
+            <div class="text-center">
+                <div class="flex items-center justify-center gap-3 mb-3">
+                    <i class="fa-solid fa-utensils text-4xl text-emerald-400"></i>
+                    <h1 class="text-5xl font-bold bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent">
+                        Tummy AI
+                    </h1>
+                </div>
+                <p class="text-gray-400 text-lg">Speak naturally. Eat happily.</p>
+            </div>
+
+            <!-- Voice Orb -->
+            <div class="relative">
+                <div id="orb" class="orb mx-auto flex items-center justify-center">
+                    <div class="ai-face text-center">
+                        <div class="flex justify-center gap-6 mb-6">
+                            <div class="w-14 h-14 bg-white rounded-full relative overflow-hidden">
+                                <div id="leftEye" class="absolute top-4 left-4 w-6 h-8 bg-black rounded-full transition-all"></div>
+                            </div>
+                            <div class="w-14 h-14 bg-white rounded-full relative overflow-hidden">
+                                <div id="rightEye" class="absolute top-4 left-4 w-6 h-8 bg-black rounded-full transition-all"></div>
+                            </div>
+                        </div>
+                        <div id="mouth" class="w-24 h-10 bg-white mx-auto rounded-b-[40px] relative overflow-hidden transition-all">
+                            <div class="absolute bottom-2 left-1/2 -translate-x-1/2 w-12 h-3 bg-pink-500 rounded-full"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Voice Status -->
+            <div id="voiceStatus" class="glass w-full max-w-xs rounded-3xl p-6 neon-glow">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="flex items-center gap-3">
+                        <div class="waveform" id="waveform">
+                            <div class="bar"></div><div class="bar"></div><div class="bar"></div>
+                            <div class="bar"></div><div class="bar"></div>
+                        </div>
+                        <div>
+                            <div id="statusText" class="font-semibold text-emerald-400 text-lg">Ready • Say "Hey Tummy"</div>
+                            <div id="subStatus" class="text-xs text-gray-500">Voice activated</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="text-center text-xs uppercase tracking-widest text-gray-500 font-mono">Wake Word: Hey Tummy</div>
+            </div>
+        </div>
+
+        <!-- Right: Chat + Order Flow -->
+        <div class="lg:col-span-7">
+            <div class="glass rounded-3xl p-6 h-full flex flex-col" style="min-height: 680px;">
+                
+                <!-- Header -->
+                <div class="flex justify-between items-center pb-6 border-b border-white/10">
+                    <div class="flex items-center gap-4">
+                        <div class="w-10 h-10 bg-gradient-to-br from-emerald-400 to-cyan-400 rounded-2xl flex items-center justify-center">
+                            <i class="fa-solid fa-robot text-xl"></i>
+                        </div>
+                        <div>
+                            <h2 class="text-2xl font-semibold">Voice Food Assistant</h2>
+                            <p class="text-emerald-400 text-sm">Powered by real-time speech AI</p>
+                        </div>
+                    </div>
+                    <button id="micBtn" class="w-12 h-12 bg-white/10 hover:bg-white/20 rounded-2xl flex items-center justify-center transition-all active:scale-95">
+                        <i class="fa-solid fa-microphone text-2xl"></i>
+                    </button>
+                </div>
+
+                <!-- Chat Messages -->
+                <div id="chatMessages" class="flex-1 overflow-y-auto py-6 space-y-6 scrollbar-thin scrollbar-thumb-emerald-500">
+                    <div class="message ai-message bg-gradient-to-br from-emerald-900/40 to-cyan-900/30 border-l-4 border-emerald-400 p-5 rounded-3xl max-w-[85%]">
+                        <strong>👋 Hi, I'm Tummy!</strong><br>
+                        Your smartest voice food assistant.<br>
+                        Just say <span class="text-emerald-400 font-semibold">"Hey Tummy"</span> to start ordering.
+                    </div>
+                </div>
+
+                <!-- Quick Suggestions -->
+                <div id="suggestions" class="hidden flex-wrap gap-3 pt-4 border-t border-white/10">
+                    <div onclick="quickStart('pizza')" class="food-chip cursor-pointer px-6 py-3 bg-white/10 hover:bg-white/20 rounded-3xl text-sm font-medium flex items-center gap-2">
+                        <span>Pizza</span>
+                    </div>
+                    <div onclick="quickStart('burger')" class="food-chip cursor-pointer px-6 py-3 bg-white/10 hover:bg-white/20 rounded-3xl text-sm font-medium flex items-center gap-2">
+                        <span>Burger</span>
+                    </div>
+                    <div onclick="quickStart('sushi')" class="food-chip cursor-pointer px-6 py-3 bg-white/10 hover:bg-white/20 rounded-3xl text-sm font-medium flex items-center gap-2">
+                        <span>Sushi</span>
+                    </div>
+                    <div onclick="quickStart('pasta')" class="food-chip cursor-pointer px-6 py-3 bg-white/10 hover:bg-white/20 rounded-3xl text-sm font-medium flex items-center gap-2">
+                        <span>Pasta</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // === Core Variables ===
+        let recognition, synth, isListening = false;
+        let orderState = {
+            active: false,
+            step: 0,
+            foodType: '',
+            quantity: 1,
+            restaurant: null
+        };
+
+        const foodDB = {
+            pizza: { emoji: "🍕", color: "orange" },
+            burger: { emoji: "🍔", color: "amber" },
+            sushi: { emoji: "🍣", color: "rose" },
+            pasta: { emoji: "🍝", color: "sky" },
+            tacos: { emoji: "🌮", color: "yellow" },
+            salad: { emoji: "🥗", color: "emerald" },
+            ramen: { emoji: "🍜", color: "red" }
+        };
+
+        const restaurants = {
+            pizza: ["Mario's Pizzeria", "Crust & Flame", "Neapolitan Haven"],
+            burger: ["Smash Society", "Beef & Buns", "Golden Grill"],
+            sushi: ["Sakura Roll", "Ocean Blue", "Tokyo Drift Sushi"],
+            pasta: ["Nonna's Table", "Truffle & Basil"],
+        };
+
+        // DOM Elements
+        const chatMessages = document.getElementById('chatMessages');
+        const orb = document.getElementById('orb');
+        const statusText = document.getElementById('statusText');
+        const suggestions = document.getElementById('suggestions');
+
+        // Initialize Speech
+        function initSpeech() {
+            synth = window.speechSynthesis;
+            if ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window) {
+                recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+                recognition.continuous = true;
+                recognition.interimResults = false;
+                recognition.lang = 'en-US';
+            }
+        }
+
+        // Speak Function
+        function speak(text) {
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.rate = 1.05;
+            utterance.pitch = 1.1;
+            synth.speak(utterance);
+        }
+
+        // Add Message
+        function addMessage(text, type = 'ai') {
+            const div = document.createElement('div');
+            div.className = `message ${type}-message p-5 rounded-3xl max-w-[85%] ${type === 'ai' ? 
+                'bg-gradient-to-br from-emerald-900/40 to-cyan-900/30 border-l-4 border-emerald-400' : 
+                'bg-gradient-to-br from-pink-900/40 to-rose-900/30 border-r-4 border-pink-400 ml-auto text-right'}`;
+            div.innerHTML = text;
+            chatMessages.appendChild(div);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        // Start Listening
+        function startListening() {
+            if (!recognition) return;
+            recognition.start();
+            isListening = true;
+            orb.classList.add('listening');
+            statusText.textContent = "🎤 Listening...";
+            statusText.className = "font-semibold text-pink-400 text-lg";
+        }
+
+        // Stop Listening
+        function stopListening() {
+            if (recognition) recognition.stop();
+            isListening = false;
+            orb.classList.remove('listening');
+            statusText.textContent = "Ready • Say 'Hey Tummy'";
+            statusText.className = "font-semibold text-emerald-400 text-lg";
+        }
+
+        // Process Speech
+        function processSpeech(transcript) {
+            addMessage(transcript, 'user');
+
+            const lower = transcript.toLowerCase();
+
+            if (!orderState.active && lower.includes('hey tummy')) {
+                activateAssistant();
+            } else if (orderState.active) {
+                handleOrderFlow(lower);
+            }
+        }
+
+        function activateAssistant() {
+            orderState.active = true;
+            orderState.step = 1;
+            suggestions.classList.remove('hidden');
+            
+            addMessage("Hey there! What are you craving today?", 'ai');
+            speak("Hey there! What are you craving today?");
+        }
+
+        function handleOrderFlow(text) {
+            // Simple intent matching (expandable)
+            if (orderState.step === 1) {
+                for (let key in foodDB) {
+                    if (text.includes(key)) {
+                        orderState.foodType = key;
+                        orderState.step = 2;
+                        addMessage(`Great choice! ${foodDB[key].emoji} How many ${key}s would you like?`, 'ai');
+                        speak(`Awesome! How many ${key}s would you like?`);
+                        return;
+                    }
+                }
+            }
+        }
+
+        function quickStart(food) {
+            orderState.foodType = food;
+            orderState.step = 2;
+            addMessage(`You selected ${foodDB[food].emoji} ${food.charAt(0).toUpperCase() + food.slice(1)}`, 'ai');
+            speak(`Got it! How many ${food}s would you like?`);
+        }
+
+        // Event Listeners
+        window.onload = () => {
+            initSpeech();
+
+            if (recognition) {
+                recognition.onresult = (e) => {
+                    const transcript = e.results[e.results.length - 1][0].transcript;
+                    processSpeech(transcript);
+                };
+
+                recognition.onend = () => {
+                    if (isListening) setTimeout(startListening, 800);
+                };
+            }
+
+            // Click orb to toggle listening
+            orb.addEventListener('click', () => {
+                if (isListening) stopListening();
+                else startListening();
+            });
+
+            // Initial greeting
+            setTimeout(() => {
+                addMessage("I'm ready whenever you are. Just say <strong>Hey Tummy</strong>!", 'ai');
+                speak("Welcome to Tummy AI. Say Hey Tummy to begin.");
+            }, 800);
+        };
+    </script>
+</body>
+</html>
